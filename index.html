@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云码</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+
+      #app {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      #todesk {
+        margin-top: 20px;
+      }
+
+      .PJ {
+        margin-bottom: 20px;
+      }
+
+      .PJ span {
+        display: inline-block;
+        width: 100px;
+        font-weight: bold;
+      }
+
+      .PJ input[type="text"] {
+        width: calc(100% - 300px);
+        min-width: 150px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        padding: 10px 15px;
+        margin-right: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .infoBox {
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      th, td {
+        padding: 10px;
+        min-width: 50px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+      td{
+        min-height: 30px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      strong {
+        color: #333;
+      }
+
+    </style>
+</head>
+<body>
+  <div id="app">
+    <h1>信息接收</h1>
+    <div id="todesk" >
+      <div class="PJ">
+        <span>项目名称</span><input type="text"  value="Todek云电脑" readonly>
+        <br><br>
+        <span>手机号</span><input type="text"  v-model="phone" :readonly="isPhoneReadonly" placeholder="输入我给的号码">
+      </div>
+        <button @click="getphone(88261)" :disabled="isPhoneReadonly">获取号码</button>
+        <button @click="retable()">清空列表</button>
+      <div class="infoBox">
+        <table>
+          <thead>
+            <tr>
+              <th>项目ID</th>
+              <th>区号</th>
+              <th>运营商</th>
+              <th>归属地</th>
+              <th>号码</th>
+              <th>验证码</th>
+              <th>完整内容</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{id}}</td>
+              <td>{{country_qu}}</td>
+              <td>{{sp}}</td>
+              <td>{{phone_gsd}}</td>
+              <td @click="copy(phone)">{{ phone }}</td>
+              <td @click="copy(yzm)">{{ yzm }}</td>
+              <td>{{ info}}</td>
+              <td>{{ now }}</td>
+              <td>{{act}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <br>
+    <strong>操作步骤：</strong>
+    <br>
+    <p>输入号码 -> 点击获取号码 -> 手机/PC端输入我给的号码注册 -> 等待网页获取验证码 -> 用验证码登录</p>
+  </div>
+
+    <script src="./vue.js"></script>
+    <script src="./axios.min.js"></script>
+
+
+    <script>
+      const app = new Vue({
+          el:'#app',
+          data:{
+            token:'12979f4ebab7cfff5b635dcbfb1227d0356eeefcade0dd7b553fbb31629f675038677481536f06ac914e1e3b331777b7d974aab614b1e7b968a2bdbfd400df9e0f7804ba1f0e7484bcd8f411fb8458ce',
+            id:'',
+            country_qu:'',
+            sp:'',
+            phone_gsd:'',
+            phone:'',
+            yzm:'',
+            info:'',
+            now:'',
+            act:'',
+            isPhoneReadonly: false,
+          },
+          methods:{
+            copy(text){
+              navigator.clipboard.writeText(text)
+              .then(() => {
+                    alert('已复制到剪切板！');
+                })
+                .catch(err => {
+                    console.error('复制失败:', err);
+                });
+            },
+
+            async getphone(id){
+                if(this.phone.trim() === '' ){
+                    alert('请输入正确的手机号');
+                    return
+                }
+                const url = `https://api.haozhuma.com/sms/?api=getPhone&token=${this.token}&sid=${id}&phone=${this.phone}`
+
+                try {
+                    const response = await axios.get(url);
+                    const data = response.data;
+                    console.log(data);
+                    if(data.code == "0") {
+                      this.id = data.sid;
+                      this.phone = data.phone; // 提取手机号码
+                      this.country_qu = data.country_qu; // 提取商店名称
+                      this.country_name = data.country_name; // 提取国家名称
+                      this.sp = data.sp;
+                      this.phone_gsd = data.phone_gsd;
+                     } else {
+                      alert('获取手机号码失败1:');
+                      return ;
+                    }
+
+                }catch (error) {
+                    console.error('获取手机号码失败2:', error);
+                    return ;
+                  }
+
+//                 {
+//     "msg": "等待",
+//     "code": -1,
+//     "time": "2025-02-28 11:06:21"
+// }
+                    this.isPhoneReadonly = true;
+                    let num = 60;
+                    const url1 = `https://api.haozhuma.com/sms/?api=getMessage&token=${this.token}&sid=${id}&phone=${this.phone}`;
+                    console.log(url1);
+                    let response1 = await axios.get(url1);
+                    let da = response1.data;
+                    for(let i=1;i<=num;i++){
+                      // console.log(i);
+                      this.now = `${i*2}/120,正在获取验证码`;
+                      await this.sleep(2000);
+                      response1 = await axios.get(url1);
+                      da = response1.data;
+                      console.log(da)
+                      if(da.code != '-1') break;
+                    }
+
+//                     {
+//     "msg": "success",
+//     "code": "0",
+//     "sms": "【ToDesk云电脑公众号】725232，此验证码用于您注册和登录ToDesk云电脑，5分钟内有效，请勿泄漏或转发他人。",
+//     "yzm": "725232"
+// }
+
+                    if(da.code == '0'){
+                      this.yzm = da.yzm
+                      this.info = da.sms
+                      this.now = '已获取到验证码';
+                      this.act = '验证码获取成功';
+                    }else{
+                      this.act = '验证码获取失败';
+                    }
+                    this.isPhoneReadonly = false;
+                    // 17101050951
+                    // 17112980135
+            },
+
+            sleep(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            },
+            
+            retable(){
+              this.id = '';
+              this.phone = ''; // 提取手机号码
+              this.country_qu = ''; // 提取商店名称
+              this.country_name = ''; // 提取国家名称
+              this.sp = '';
+              this.phone_gsd = '';
+              this.act = '';
+              this.yzm = '';
+              this.info = '';
+            },
+
+            async getinfo(phone,num){
+              const url = `https://api.yayukj.cn/sms/?api=getMessage&token=${this.token}&sid=${this.id}&phone=`+phone;
+              try {
+                let response = await axios.get(url);
+                let data = response.data;
+              }catch (error) {
+                console.error('获取手机号码失败2:', error);
+              }
+            }
+          }
+       })  
+    </script>    
+</body>
+</html>
