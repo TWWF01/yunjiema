@@ -186,7 +186,7 @@
                 try {
                     const response = await axios.get(url);
                     const data = response.data;
-                    console.log(data);
+                    // console.log(data);
                     if(data.code == "0") {
                       this.id = data.sid;
                       this.phone = data.phone; // 提取手机号码
@@ -212,7 +212,7 @@
                     this.isPhoneReadonly = true;
                     let num = 60;
                     const url1 = `https://api.haozhuma.com/sms/?api=getMessage&token=${this.token}&sid=${id}&phone=${this.phone}`;
-                    console.log(url1);
+                    // console.log(url1);
                     let response1 = await axios.get(url1);
                     let da = response1.data;
                     for(let i=1;i<=num;i++){
@@ -221,7 +221,7 @@
                       await this.sleep(2000);
                       response1 = await axios.get(url1);
                       da = response1.data;
-                      console.log(da)
+                      // console.log(da)
                       if(da.code != '-1') break;
                     }
 
