@@ -95,6 +95,22 @@
         color: #333;
       }
 
+      /* 新增的 select 样式 */
+      .PJ select {
+        width: calc(100% - 300px);
+        min-width: 150px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        appearance: none; /* 移除默认样式 */
+        -webkit-appearance: none; /* 移除默认样式 */
+        -moz-appearance: none; /* 移除默认样式 */
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="#333" d="M2 0L0 2h4z"/></svg>') no-repeat right 10px center;
+        background-size: 10px 6px;
+        background-color: #fff;
+        cursor: pointer;
+      }
+
     </style>
 </head>
 <body>
@@ -102,11 +118,16 @@
     <h1>信息接收</h1>
     <div id="todesk" >
       <div class="PJ">
-        <span>项目名称</span><input type="text"  value="Todek云电脑" readonly>
+        <span>项目名称</span>
+        <select name="status" id="status" v-model="Selection" :disabled="isPhoneReadonly">
+          <option value="88261" >Todesk云电脑</option>
+          <option value="86019">海马云电脑</option>
+        </select>
         <br><br>
         <span>手机号</span><input type="text"  v-model="phone" :readonly="isPhoneReadonly" placeholder="输入我给的号码">
       </div>
-        <button @click="getphone(88261)" :disabled="isPhoneReadonly">获取号码</button>
+        <!-- <button @click="cs()">测试</button> -->
+        <button @click="getphone()" :disabled="isPhoneReadonly">获取号码</button>
         <button @click="retable()">清空列表</button>
       <div class="infoBox">
         <table>
@@ -142,7 +163,7 @@
     <br>
     <strong>操作步骤：</strong>
     <br>
-    <p>输入号码 -> 点击获取号码 -> 手机/PC端输入我给的号码注册 -> 等待网页获取验证码 -> 用验证码登录</p>
+    <p>点击项目名称选择 -> 输入号码 -> 点击获取号码 -> 手机/PC端输入我给的号码注册 -> 等待网页获取验证码 -> 用验证码登录</p>
   </div>
 
     <script src="./vue.js"></script>
@@ -164,8 +185,14 @@
             now:'',
             act:'',
             isPhoneReadonly: false,
+            Selection:'',
           },
           methods:{
+            cs(){
+              console.log(this.Selection);
+              return ;
+            },
+
             copy(text){
               navigator.clipboard.writeText(text)
               .then(() => {
@@ -181,12 +208,12 @@
                     alert('请输入正确的手机号');
                     return
                 }
-                const url = `https://api.haozhuma.com/sms/?api=getPhone&token=${this.token}&sid=${id}&phone=${this.phone}`
+                const url = `https://api.haozhuma.com/sms/?api=getPhone&token=${this.token}&sid=${this.Selection}&phone=${this.phone}`
 
                 try {
                     const response = await axios.get(url);
                     const data = response.data;
-                    // console.log(data);
+                    console.log(data);
                     if(data.code == "0") {
                       this.id = data.sid;
                       this.phone = data.phone; // 提取手机号码
@@ -211,8 +238,8 @@
 // }
                     this.isPhoneReadonly = true;
                     let num = 60;
-                    const url1 = `https://api.haozhuma.com/sms/?api=getMessage&token=${this.token}&sid=${id}&phone=${this.phone}`;
-                    // console.log(url1);
+                    const url1 = `https://api.haozhuma.com/sms/?api=getMessage&token=${this.token}&sid=${this.Selection}&phone=${this.phone}`;
+                    console.log(url1);
                     let response1 = await axios.get(url1);
                     let da = response1.data;
                     for(let i=1;i<=num;i++){
@@ -221,7 +248,7 @@
                       await this.sleep(2000);
                       response1 = await axios.get(url1);
                       da = response1.data;
-                      // console.log(da)
+                      console.log(da)
                       if(da.code != '-1') break;
                     }
 
@@ -262,7 +289,7 @@
             },
 
             async getinfo(phone,num){
-              const url = `https://api.yayukj.cn/sms/?api=getMessage&token=${this.token}&sid=${this.id}&phone=`+phone;
+              const url = `https://api.yayukj.cn/sms/?api=getMessage&token=${this.token}&sid=${this.Selection}&phone=`+phone;
               try {
                 let response = await axios.get(url);
                 let data = response.data;
