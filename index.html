@@ -129,6 +129,7 @@
         <!-- <button @click="cs()">测试</button> -->
         <button @click="getphone()" :disabled="isPhoneReadonly">获取号码</button>
         <button @click="retable()">清空列表</button>
+        <!-- <button @click="cs()">测试</button> -->
       <div class="infoBox">
         <table>
           <thead>
@@ -186,10 +187,14 @@
             act:'',
             isPhoneReadonly: false,
             Selection:'',
+            PhoneArray:JSON.parse(localStorage.getItem('myPhoneArray')) || []
           },
           methods:{
             cs(){
-              console.log(this.Selection);
+              console.log('已使用手机号'+this.PhoneArray);
+              this.PhoneArray.push(this.phone);
+              console.log('已使用手机号'+this.PhoneArray);
+              localStorage.setItem('myPhoneArray', JSON.stringify(this.PhoneArray));
               return ;
             },
 
@@ -203,11 +208,17 @@
                 });
             },
 
-            async getphone(id){
+            async getphone(){
                 if(this.phone.trim() === '' ){
                     alert('请输入正确的手机号');
                     return
                 }
+                console.log('已使用的手机号'+this.PhoneArray);
+                if (this.PhoneArray && this.PhoneArray.includes(this.phone)) {
+                    alert('手机号'+this.phone + '你已经使用过了');
+                    return;
+                }
+
                 const url = `https://api.haozhuma.com/sms/?api=getPhone&token=${this.token}&sid=${this.Selection}&phone=${this.phone}`
 
                 try {
@@ -260,10 +271,13 @@
 // }
 
                     if(da.code == '0'){
-                      this.yzm = da.yzm
-                      this.info = da.sms
+                      this.PhoneArray.push(this.phone);
+                      console.log('已使用手机号'+this.PhoneArray);
+                      localStorage.setItem('myPhoneArray', JSON.stringify(this.PhoneArray));
                       this.now = '已获取到验证码';
                       this.act = '验证码获取成功';
+                      this.yzm = da.yzm
+                      this.info = da.sms
                     }else{
                       this.act = '验证码获取失败';
                     }
